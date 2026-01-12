@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Noti Dashboard
 
-## Getting Started
+Dashboard theo dõi doanh thu từ MoMo và MB Bank.
 
-First, run the development server:
+## Setup
+
+### 1. Tạo database Supabase
+
+1. Đăng ký tại [supabase.com](https://supabase.com)
+2. Tạo project mới
+3. Chạy SQL sau trong SQL Editor:
+
+```sql
+CREATE TABLE transactions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  amount INTEGER NOT NULL,
+  source TEXT NOT NULL,
+  raw_text TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable Row Level Security (optional)
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+
+-- Allow all operations for now
+CREATE POLICY "Allow all" ON transactions FOR ALL USING (true);
+```
+
+### 2. Cấu hình environment
+
+Tạo file `.env.local`:
+
+```env
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-super-secret-key-change-in-production
+
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+
+MOBILE_API_KEY=noti-secret-key-2024
+```
+
+### 3. Chạy development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 4. Đăng nhập
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Email: `admin@noti.app`
+- Password: `admin123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deploy lên Vercel
 
-## Learn More
+1. Push code lên GitHub
+2. Import project vào Vercel
+3. Thêm environment variables trong Vercel dashboard
+4. Deploy!
 
-To learn more about Next.js, take a look at the following resources:
+## API Endpoints
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### POST /api/transactions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Thêm giao dịch mới (dùng cho mobile app):
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+curl -X POST https://your-domain.vercel.app/api/transactions \
+  -H "Authorization: Bearer noti-secret-key-2024" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 1000, "source": "momo", "rawText": "..."}'
+```
