@@ -240,6 +240,44 @@ export default function DashboardClient() {
         return Math.round(allTransactions.reduce((sum, t) => sum + t.amount, 0) / allTransactions.length);
     }, [allTransactions]);
 
+    // Simulated AI Insights
+    const aiInsights = useMemo(() => {
+        const insights: string[] = [];
+
+        // Trend Insight
+        if (weekOverWeekChange) {
+            const change = parseFloat(weekOverWeekChange);
+            if (change > 10) {
+                insights.push(`🚀 Doanh thu tuần này tăng mạnh ${change}% so với tuần trước. Phong độ rất tốt!`);
+            } else if (change < -10) {
+                insights.push(`📉 Doanh thu tuần này đang giảm ${Math.abs(change)}%. Cần kiểm tra lại các chiến dịch marketing.`);
+            } else {
+                insights.push(`📊 Doanh thu tuần này khá ổn định so với tuần trước.`);
+            }
+        }
+
+        // Source Insight
+        const momoTotal = allTransactions.filter(t => t.source === 'momo').reduce((sum, t) => sum + t.amount, 0);
+        const mbTotal = allTransactions.filter(t => t.source === 'mbbank').reduce((sum, t) => sum + t.amount, 0);
+        if (momoTotal > mbTotal * 2) {
+            insights.push(`📱 Khách hàng ưa chuộng MoMo vượt trội so với chuyển khoản ngân hàng.`);
+        } else if (mbTotal > momoTotal * 2) {
+            insights.push(`🏦 Chuyển khoản MB Bank đang là kênh thanh toán chính.`);
+        }
+
+        // Peak Hour Insight
+        if (peakHour && peakHour.amount > 0) {
+            insights.push(`⏰ Khung giờ ${peakHour.hour} là "giờ vàng". Hãy đảm bảo sẵn sàng phục vụ vào lúc này.`);
+        }
+
+        // Ticket Size
+        if (averageTransaction > 100000) {
+            insights.push(`💰 Giá trị đơn hàng trung bình cao (${formatCurrency(averageTransaction)}). Khách đang mua các đồ cao cấp.`);
+        }
+
+        return insights.length > 0 ? insights : ["Hệ thống AI đang thu thập thêm dữ liệu để phân tích."];
+    }, [weekOverWeekChange, allTransactions, peakHour, averageTransaction]);
+
     // Highest and lowest transaction
     const highestTransaction = useMemo(() => {
         if (allTransactions.length === 0) return 0;
@@ -542,6 +580,23 @@ export default function DashboardClient() {
                             <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-lg rounded-2xl p-5 border border-white/10">
                                 <p className="text-gray-400 text-xs mb-1">Tổng giao dịch (14 ngày)</p>
                                 <p className="text-2xl font-bold text-white">{allTransactions.length}</p>
+                            </div>
+                        </div>
+
+                        {/* AI Insights Card */}
+                        <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/20 mb-8">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="text-xl">💡</span>
+                                <h3 className="text-lg font-bold text-white">Phân tích từ AI</h3>
+                                <span className="ml-auto text-[10px] font-bold tracking-widest text-purple-400 bg-purple-500/10 px-2 py-1 rounded-full uppercase">Smart Analytics</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {aiInsights.map((insight, index) => (
+                                    <div key={index} className="flex items-start gap-3 bg-white/5 p-3 rounded-xl border border-white/5 group hover:border-purple-500/30 transition-all">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-2 shrink-0 group-hover:scale-125 transition-all" />
+                                        <p className="text-gray-300 text-sm leading-relaxed">{insight}</p>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 

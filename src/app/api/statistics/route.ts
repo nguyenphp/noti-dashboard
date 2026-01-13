@@ -119,6 +119,38 @@ export async function GET(request: NextRequest) {
         const momoCount = allTransactions.filter(t => t.source === 'momo').length;
         const mbCount = allTransactions.filter(t => t.source === 'mbbank').length;
 
+        // AI Insights (Simulated)
+        const insights: string[] = [];
+
+        // 1. Trend Insight
+        if (weekOverWeekChange) {
+            const change = parseFloat(weekOverWeekChange);
+            if (change > 10) {
+                insights.push(`🚀 Doanh thu tuần này tăng mạnh ${change}% so với tuần trước. Phong độ rất tốt!`);
+            } else if (change < -10) {
+                insights.push(`📉 Doanh thu tuần này đang giảm ${Math.abs(change)}%. Cần kiểm tra lại các chiến dịch marketing.`);
+            } else {
+                insights.push(`📊 Doanh thu tuần này khá ổn định so with tuần trước.`);
+            }
+        }
+
+        // 2. Source Insight
+        if (momoTotal > mbTotal * 2) {
+            insights.push(`📱 Khách hàng của bạn ưa chuộng MoMo vượt trội so với chuyển khoản ngân hàng.`);
+        } else if (mbTotal > momoTotal * 2) {
+            insights.push(`🏦 Chuyển khoản MB Bank đang là kênh thanh toán chính của cửa hàng.`);
+        }
+
+        // 3. Peak Hour Insight
+        if (peakHour) {
+            insights.push(`⏰ Khung giờ ${peakHour.hour} là "giờ vàng" của quán. Hãy đảm bảo luôn sẵn sàng phục vụ vào lúc này.`);
+        }
+
+        // 4. Ticket Size Insight
+        if (averageTransaction > 100000) {
+            insights.push(`💰 Giá trị đơn hàng trung bình của bạn khá cao (${averageTransaction.toLocaleString()}đ). Khách hàng đang mua các sản phẩm cao cấp.`);
+        }
+
         return NextResponse.json({
             kpis: {
                 totalTransactions,
@@ -139,7 +171,8 @@ export async function GET(request: NextRequest) {
             sources: {
                 momo: { total: momoTotal, count: momoCount },
                 mbbank: { total: mbTotal, count: mbCount },
-            }
+            },
+            insights: insights.length > 0 ? insights : ["Hệ thống AI đang thu thập thêm dữ liệu để đưa ra lời khuyên chính xác nhất."]
         });
     } catch (error) {
         console.error('Error fetching statistics:', error);
